@@ -59,6 +59,7 @@ const Emotion = styled.TouchableOpacity`
 
 const EmotionText = styled.Text`
   font-size: 24px;
+  font-weight: 500;
 `;
 
 const emotions = ["🌈", "💧", "⚡️", "☀️", "❄️", "🌪"];
