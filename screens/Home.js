@@ -1,7 +1,9 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components/native";
 import { Ionicons } from "@expo/vector-icons";
 import colors from "../colors";
+import { useDB } from "../context";
+import { FlatList, TouchableOpacity } from "react-native";
 
 const View = styled.View`
   flex: 1;
@@ -29,13 +31,66 @@ const BtnText = styled.Text`
   color: white;
 `;
 
-const Home = ({ navigation: { navigate } }) => (
-  <View>
-    <Title>My journal</Title>
-    <Btn onPress={() => navigate("Write")}>
-      <Ionicons name="add" color="white" size={40} />
-    </Btn>
-  </View>
-);
+const Record = styled.View`
+  background-color: ${colors.cardColor};
+  flex-direction: row;
+  align-items: center;
+  padding: 10px 20px;
+  border-radius: 10px;
+`;
+
+const Emotion = styled.Text`
+  font-size: 24px;
+  margin-right: 10px;
+`;
+const Message = styled.Text`
+  font-size: 18px;
+`;
+
+const Separator = styled.View`
+  height: 10px;
+`;
+
+const Home = ({ navigation: { navigate } }) => {
+  const realm = useDB();
+  const [feelings, setFeelings] = useState([]);
+  useEffect(() => {
+    const feelings = realm.objects("Feeling");
+    feelings.addListener((feelings, changes) => {
+      setFeelings(feelings.sorted("_id", true));
+    });
+    return () => {
+      feelings.removeAllListeners();
+    };
+  }, []);
+  const onPress = (id) => {
+    realm.write(() => {
+      const feeling = realm.objectForPrimaryKey("Feeling", id);
+      realm.delete(feeling);
+    });
+  };
+  return (
+    <View>
+      <Title>My journal</Title>
+      <FlatList
+        data={feelings}
+        contentContainerStyle={{ paddingVertical: 10 }}
+        ItemSeparatorComponent={Separator}
+        keyExtractor={(feeling) => feeling._id + ""}
+        renderItem={({ item }) => (
+          <TouchableOpacity onPress={() => onPress(item._id)}>
+            <Record>
+              <Emotion>{item.emotion}</Emotion>
+              <Message>{item.message}</Message>
+            </Record>
+          </TouchableOpacity>
+        )}
+      />
+      <Btn onPress={() => navigate("Write")}>
+        <Ionicons name="add" color="white" size={40} />
+      </Btn>
+    </View>
+  );
+};
 
 export default Home;

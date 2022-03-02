@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components/native";
 import colors from "../colors";
 import { Alert } from "react-native";
@@ -65,7 +65,7 @@ const EmotionText = styled.Text`
 
 const emotions = ["🌈", "💧", "⚡️", "☀️", "❄️", "🌪"];
 
-const Write = () => {
+const Write = ({ navigation: { goBack } }) => {
   const realm = useDB();
   const [selectedEmotion, setEmotion] = useState(null);
   const [feelings, setFeelings] = useState("");
@@ -105,7 +105,7 @@ const Write = () => {
         value={feelings}
         placeholder="Write your feelings..."
       />
-      <Btn>
+      <Btn onPress={onSubmit}>
         <BtnText>Save</BtnText>
       </Btn>
     </View>
